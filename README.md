@@ -107,8 +107,8 @@ npm run dev
 
 ## 🌐 Deployment
 
-- **Frontend:** [Vercel](https://xcrm-mu.vercel.app/)
-- **Backend:** [Render](https://xcrm-qleo.onrender.com)
+- **Frontend:** [Vercel](https://xcrm-mini.vercel.app/)
+- **Backend:** [Render](https://x-crm.onrender.com)
 - **DataBase:** [MongoDB]
 - **API Docs:** `/api-docs` route on backend
 
