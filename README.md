@@ -77,7 +77,7 @@ Thank you for reviewing my submission for the Xeno SDE Internship Assignment. Th
 ### 1. Clone the Repository
 
 ```sh
-git clone https://github.com/raagavi2105/XCRM.git
+git clone https://github.com/raagavi2105/X_CRM.git
 cd XCRM
 ```
 
@@ -168,7 +168,7 @@ npm run dev
 
 - Swagger UI is available at:  
  
-  [https://xcrm-qleo.onrender.com/api-docs](https://xcrm-qleo.onrender.com/api-docs)
+  [https://xcrm-qleo.onrender.com/api-docs](https://x-crm.onrender.com/api-docs)
 
 ---
 
