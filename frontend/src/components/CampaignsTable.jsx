@@ -12,6 +12,15 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  getCampaigns,
+  getCampaignStats,
+  deleteCampaign,
+  sendCampaignMessage,
+  getFailedCustomers,
+  resetCampaigns,
+} from '../data/store';
 
 function renderRules(rules) {
   if (!rules) return '-';
@@ -41,25 +50,19 @@ export default function CampaignsTable() {
   const [deleteId, setDeleteId] = useState(null);
   const [sendDialog, setSendDialog] = useState({ open: false, campaignId: null, campaignName: '', message: '' });
   const [failedDialog, setFailedDialog] = useState({ open: false, customers: [], campaignName: '' });
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
   const fetchCampaigns = () => {
     setLoading(true);
-    fetch('http://localhost:4000/api/campaigns')
-      .then(res => res.json())
-      .then(data => {
-        setCampaigns(data);
-        setLoading(false);
-      });
+    setCampaigns(getCampaigns());
+    setLoading(false);
   };
 
   const fetchStats = () => {
-    fetch('http://localhost:4000/api/campaigns/stats')
-      .then(res => res.json())
-      .then(data => {
-        const statsMap = {};
-        data.forEach(s => { statsMap[s.campaignId] = s; });
-        setStats(statsMap);
-      });
+    const data = getCampaignStats();
+    const statsMap = {};
+    data.forEach(s => { statsMap[s.campaignId] = s; });
+    setStats(statsMap);
   };
 
   useEffect(() => {
@@ -80,30 +83,32 @@ export default function CampaignsTable() {
     setOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteId) return;
-    await fetch(`http://localhost:4000/api/campaigns/${deleteId}`, { method: 'DELETE' });
+    deleteCampaign(deleteId);
     setDeleteId(null);
     fetchCampaigns();
     fetchStats();
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!sendDialog.campaignId || !sendDialog.message.trim()) return;
-    await fetch(`http://localhost:4000/api/campaigns/${sendDialog.campaignId}/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: sendDialog.message }),
-    });
+    sendCampaignMessage(sendDialog.campaignId);
     setSendDialog({ open: false, campaignId: null, campaignName: '', message: '' });
     fetchCampaigns();
     fetchStats();
   };
 
-  const handleShowFailed = async (campaignId, campaignName) => {
-    const res = await fetch(`http://localhost:4000/api/campaigns/${campaignId}/failed-customers`);
-    const customers = await res.json();
+  const handleShowFailed = (campaignId, campaignName) => {
+    const customers = getFailedCustomers(campaignId);
     setFailedDialog({ open: true, customers, campaignName });
+  };
+
+  const handleResetCampaigns = () => {
+    resetCampaigns();
+    setResetConfirmOpen(false);
+    fetchCampaigns();
+    fetchStats();
   };
 
   if (loading) return <CircularProgress sx={{ mt: 8 }} />;
@@ -122,10 +127,36 @@ export default function CampaignsTable() {
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
               Campaigns
             </Typography>
-            <Button variant="contained" onClick={() => { setEditCampaign(null); setOpen(true); }} sx={{ fontWeight: 600, borderRadius: 2 }}>
-              Create Campaign
-            </Button>
+            <Stack direction="row" spacing={1.5}>
+              <Tooltip title="Clear demo campaigns and start your own from scratch">
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => setResetConfirmOpen(true)}
+                  sx={{ fontWeight: 600, borderRadius: 2 }}
+                >
+                  Start New Campaign
+                </Button>
+              </Tooltip>
+              <Button variant="contained" onClick={() => { setEditCampaign(null); setOpen(true); }} sx={{ fontWeight: 600, borderRadius: 2 }}>
+                Create Campaign
+              </Button>
+            </Stack>
           </Box>
+          {campaigns.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Typography variant="h6" sx={{ color: '#5f6368', mb: 1 }}>
+                No campaigns yet
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#9aa0a6', mb: 3 }}>
+                Create your first campaign to get started.
+              </Typography>
+              <Button variant="contained" onClick={() => { setEditCampaign(null); setOpen(true); }} sx={{ fontWeight: 600, borderRadius: 2 }}>
+                Create Campaign
+              </Button>
+            </Box>
+          ) : (
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 2, maxHeight: 600 }}>
             <Table stickyHeader>
               <TableHead>
@@ -189,12 +220,22 @@ export default function CampaignsTable() {
               </TableBody>
             </Table>
           </TableContainer>
+          )}
         </Paper>
       </Box>
       <Dialog open={open} onClose={() => { setOpen(false); setEditCampaign(null); }} maxWidth="sm" fullWidth>
         <DialogContent>
           <CampaignForm onCreated={handleCreated} editData={editCampaign} />
         </DialogContent>
+      </Dialog>
+      {/* Reset / Start New Campaign Confirmation Dialog */}
+      <Dialog open={resetConfirmOpen} onClose={() => setResetConfirmOpen(false)}>
+        <DialogTitle>Start New Campaign?</DialogTitle>
+        <DialogContent>This will clear all demo campaign data so you can create your own campaigns from scratch. Your audience data will not be affected.</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setResetConfirmOpen(false)}>Cancel</Button>
+          <Button color="secondary" variant="contained" onClick={handleResetCampaigns}>Clear Demo Data</Button>
+        </DialogActions>
       </Dialog>
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>

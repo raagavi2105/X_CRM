@@ -3,6 +3,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, IconButton, Stack, Tooltip, Box, TextField, Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import { Edit, Trash2, Search, Filter, Info } from 'lucide-react';
+import { getCustomers, deleteCustomer } from '../data/store';
 
 export default function AudienceTable() {
   const [customers, setCustomers] = useState([]);
@@ -20,13 +21,10 @@ export default function AudienceTable() {
 
   const fetchCustomers = () => {
     setLoading(true);
-    fetch('http://localhost:4000/api/customers')
-      .then(res => res.json())
-      .then(data => {
-        setCustomers(data);
-        setFiltered(data);
-        setLoading(false);
-      });
+    const data = getCustomers();
+    setCustomers(data);
+    setFiltered(data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -34,10 +32,10 @@ export default function AudienceTable() {
   }, []);
 
   const handleEdit = (id) => { alert('Edit customer: ' + id); };
-  
-  const handleDelete = async () => {
+
+  const handleDelete = () => {
     if (!deleteDialog.customerId) return;
-    await fetch(`http://localhost:4000/api/customers/${deleteDialog.customerId}`, { method: 'DELETE' });
+    deleteCustomer(deleteDialog.customerId);
     setDeleteDialog({ open: false, customerId: null, customerName: '' });
     fetchCustomers();
   };

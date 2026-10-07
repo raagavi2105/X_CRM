@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl, Paper, IconButton, Card, CardContent, Stack } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { previewAudience, createCampaign, updateCampaign } from '../data/store';
 
 const fields = [
   { value: 'totalSpend', label: 'Total Spend' },
@@ -132,7 +133,7 @@ export default function CampaignForm({ onCreated, editData }) {
     }
   }, [rules]);
 
-  const handlePreview = async () => {
+  const handlePreview = () => {
     setLoading(true);
     // Convert all values to numbers
     const cleanRules = JSON.parse(JSON.stringify(rules));
@@ -148,17 +149,12 @@ export default function CampaignForm({ onCreated, editData }) {
       return;
     }
     const rulesObj = clean(cleanRules[0]);
-    const res = await fetch('http://localhost:4000/api/campaigns/preview', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rules: rulesObj }),
-    });
-    const data = await res.json();
-    setAudience(data.audienceSize);
+    const audienceSize = previewAudience(rulesObj);
+    setAudience(audienceSize);
     setLoading(false);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     // Convert all values to numbers
@@ -180,17 +176,9 @@ export default function CampaignForm({ onCreated, editData }) {
       rules: rulesObj,
     };
     if (editData && editData._id) {
-      await fetch(`http://localhost:4000/api/campaigns/${editData._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(campaignData),
-      });
+      updateCampaign(editData._id, campaignData);
     } else {
-      await fetch('http://localhost:4000/api/campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(campaignData),
-      });
+      createCampaign(campaignData);
     }
     setLoading(false);
     setName('');

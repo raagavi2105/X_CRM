@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { TrendingUp, Users, Clock, BarChart2, ArrowUpRight, ArrowDownRight, Info, Link2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip as RechartsTooltip, LineChart, Line, CartesianGrid, Legend } from 'recharts';
+import { getSegmentAnalytics } from '../data/store';
 
 const statLabels = {
   mean: 'Average',
@@ -272,14 +273,10 @@ const SegmentationPage = () => {
     fetchAnalytics();
   }, []);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/segments/analytics');
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
-      }
-      const data = await response.json();
+      const data = getSegmentAnalytics();
       setAnalytics(data);
       setError(null);
     } catch (err) {

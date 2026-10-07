@@ -1,43 +1,44 @@
 import React from 'react';
 import { Box, Paper, Typography, Stack, Button, Grid, Chip, Divider } from '@mui/material';
 import { Megaphone, Users, Layers, Sparkles, Bell, Calendar, Plug, BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const features = [
   {
     icon: <Megaphone color="#1a73e8" size={36} />, // Campaigns
     title: 'Campaigns',
     desc: 'Create, manage, and track personalized marketing campaigns.',
-    link: '#',
+    link: '/campaigns',
   },
   {
     icon: <Layers color="#f59e42" size={36} />, // Segmentation
     title: 'Segmentation',
     desc: 'Segment your customers with flexible, rule-based logic.',
-    link: '#',
+    link: '/segmentation',
   },
   {
     icon: <Users color="#22c55e" size={36} />, // Audience
     title: 'Audience',
     desc: 'Manage and analyze your customer base in one place.',
-    link: '#',
+    link: '/audience',
   },
   {
     icon: <Sparkles color="#a855f7" size={36} />, // AI Insights
     title: 'AI Insights',
     desc: 'Leverage AI for smart suggestions and campaign insights.',
-    link: '#',
+    link: '/ai-suggestion',
   },
   {
     icon: <Plug color="#06b6d4" size={36} />, // Integrations
     title: 'Integrations',
     desc: 'Connect with your favorite tools and platforms seamlessly.',
-    link: '#',
+    link: null, // no Integrations page exists in this app
   },
   {
     icon: <BarChart3 color="#f43f5e" size={36} />, // Reports & Analytics
     title: 'Reports & Analytics',
     desc: 'Visualize performance and gain actionable insights.',
-    link: '#',
+    link: '/segmentation', // Segmentation page is the app's analytics view (stats, trends, correlations)
   },
 ];
 
@@ -104,7 +105,11 @@ export default function HomePage() {
               <Box sx={{ mb: 2 }}>{f.icon}</Box>
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 1, textAlign: 'center', width: '100%' }}>{f.title}</Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center', width: '100%' }}>{f.desc}</Typography>
-              <Button href={f.link} size="small" sx={{ mt: 'auto', textTransform: 'none', fontWeight: 600 }}>
+              <Button
+                {...(f.link ? { component: Link, to: f.link } : { disabled: true })}
+                size="small"
+                sx={{ mt: 'auto', textTransform: 'none', fontWeight: 600 }}
+              >
                 Learn more
               </Button>
             </Paper>
